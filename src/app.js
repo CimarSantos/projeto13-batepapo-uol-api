@@ -61,8 +61,8 @@ app.post("/participants", async (req, res) => {
     const enteredMessage = {
       from: req.body.name,
       to: "Todos",
-      text: "Entrou na sala",
-      type: "message",
+      text: "entra na sala...",
+      type: "status",
       time: `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`,
     };
 
@@ -112,6 +112,11 @@ app.post("/messages", async (req, res) => {
     res.status(400).send(error);
     return;
   }
+});
+
+app.get("/messages", async (req, res) => {
+  const messages = await db.collection("messages").find().toArray();
+  res.send(messages);
 });
 
 app.listen(5000, () => {
