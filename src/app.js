@@ -117,34 +117,6 @@ app.post("/messages", async (req, res) => {
   }
 });
 
-/* server.post("/messages", async (req, res) => {
-  const validation = messageSchema.validate(req.body);
-  const user = req.headers.user;
-  const ifUserExists = await db
-    .collection("participants")
-    .findOne({ name: user });
-
-  if (validation.error) {
-    res.status(422);
-    res.send(validation.error.details);
-    return;
-  }
-  if (!ifUserExists) {
-    res.status(422);
-    res.send("O usuário que você mandou mensagem não está logado!");
-    return;
-  }
-
-  const newMessage = {
-    ...req.body,
-    from: user,
-    time: `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`,
-  };
-
-  await db.collection("messages").insertOne(newMessage);
-
-  res.sendStatus(201);
-}); */
 
 app.get("/messages", async (req, res) => {
   const messages = await db.collection("messages").find().toArray();
