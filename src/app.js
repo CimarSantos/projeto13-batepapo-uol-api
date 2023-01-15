@@ -36,46 +36,38 @@ const messageSchema = Joi.object({
 });
 
 app.post("/participants", async (req, res) => {
-  const validation = userSchema.validate(req.body, { abortEarly: false });
+  const validation = userSchema.validate(req.body);
 
-  try {
-    if (validation.error) {
-      res.status(422).send(validation.error.details);
-      return;
-    }
-
-    const ifUserExists = await db
-      .collection("participants")
-      .findOne({ name: req.body.name });
-
-    if (ifUserExists) {
-      res.status(409).send("Este nome de usuáio já está em uso, use outro!");
-      return;
-    }
-
-    const newUser = {
-      name: req.body.name,
-      lastStatus: Date.now(),
-    };
-
-    const enteredMessage = {
-      from: req.body.name,
-      to: "Todos",
-      text: "entra na sala...",
-      type: "status",
-      time: `${dayjs().format().hour()}:${dayjs().format().minute()}:${dayjs()
-        .format()
-        .second()}`,
-    };
-    console.log(enteredMessage.time);
-
-    await db.collection("participants").insertOne(newUser);
-    await db.collection("messages").insertOne(enteredMessage);
-    res.status(201).send("Ok");
-  } catch (error) {
-    res.status(400).send(error);
+  if (validation.error) {
+    res.status(422);
+    res.send(validation.error.details);
     return;
   }
+  const ifUserExists = await db
+    .collection("participants")
+    .findOne({ name: req.body.name });
+  if (ifUserExists) {
+    res.status(409);
+    res.send("Este nome já está sendo usado, escolha outro!");
+    return;
+  }
+
+  const newUser = {
+    name: req.body.name,
+    laststatus: Date.now(),
+  };
+
+  const sucessMessage = {
+    from: req.body.name,
+    to: "Todos",
+    text: "Entra na sala",
+    type: "status",
+    time: `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`,
+  };
+
+  await db.collection("participants").insertOne(newUser);
+  await db.collection("messages").insertOne(sucessMessage);
+  res.status(201).send({ message: "OK" });
 });
 
 app.get("/participants", async (req, res) => {
@@ -84,37 +76,32 @@ app.get("/participants", async (req, res) => {
 });
 
 app.post("/messages", async (req, res) => {
-  const validation = messageSchema.validate(req.body, { abortEarly: false });
-  const { user } = req.headers;
+  const validation = messageSchema.validate(req.body);
+  const user = req.headers.user;
   const ifUserExists = await db
     .collection("participants")
     .findOne({ name: user });
 
-  try {
-    if (validation.error) {
-      res.status(422).send(validation.error.details);
-      return;
-    }
-
-    if (!ifUserExists) {
-      res
-        .status(422)
-        .send("Para enviar mensagem, o usuário deve estar logado!");
-      return;
-    }
-
-    const newMessage = {
-      ...req.body,
-      from: user,
-      time: `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`,
-    };
-
-    await db.collection("messages").insertOne(newMessage);
-    res.sendStatus(201);
-  } catch (error) {
-    res.status(400).send(error);
+  if (validation.error) {
+    res.status(422);
+    res.send(validation.error.details);
     return;
   }
+  if (!ifUserExists) {
+    res.status(422);
+    res.send("O usuário que você mandou mensagem não está logado!");
+    return;
+  }
+
+  const newMessage = {
+    ...req.body,
+    from: user,
+    time: `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`,
+  };
+
+  await db.collection("messages").insertOne(newMessage);
+
+  res.sendStatus(201);
 });
 
 
