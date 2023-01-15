@@ -59,7 +59,7 @@ app.post("/participants", async (req, res) => {
     };
 
     const enteredMessage = {
-      from: req.body.name,
+      from: "xxx",
       to: "Todos",
       text: "entra na sala...",
       type: "status",
@@ -106,7 +106,7 @@ app.post("/messages", async (req, res) => {
       time: `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`,
     };
 
-    await db.collection("messages").insertOne({ newMessage });
+    await db.collection("messages").insertOne(newMessage);
     res.sendStatus(201);
   } catch (error) {
     res.status(400).send(error);
