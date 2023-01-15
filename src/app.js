@@ -59,12 +59,13 @@ app.post("/participants", async (req, res) => {
     };
 
     const enteredMessage = {
-      from: "xxx",
+      from: req.body.name,
       to: "Todos",
       text: "entra na sala...",
       type: "status",
       time: `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`,
     };
+    console.log(enteredMessage.time);
 
     await db.collection("participants").insertOne(newUser);
     await db.collection("messages").insertOne(enteredMessage);
