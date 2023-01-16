@@ -105,7 +105,7 @@ app.post("/messages", async (req, res) => {
 });
 
 app.get("/messages", async (req, res) => {
-  const limit = req.query.limit;
+  const limit = parseInt(req.query.limit);
   const user = req.headers.user;
 
   let messages = await db
@@ -116,12 +116,34 @@ app.get("/messages", async (req, res) => {
     .toArray();
   messages.reverse();
 
-  if (limit) messages = messages.slice(0, limit);
-
+  if (!limit || limit <= 0) {
+    res.status(422).send("Algo deu errado com as mensagens");
+  }
+  messages = messages.slice(0, limit);
   messages.reverse();
 
   res.send(messages);
 });
+
+app.post("/status", async (req, res) => {
+  const user = req.headers.user;
+  const ifUserExists = await db
+    .collection("participants")
+    .findOne({ name: user });
+
+  if (!ifUserExists) {
+    res.status(404);
+    return;
+  }
+
+  await db
+    .collection("participants")
+    .updateOne({ name: user }, { $set: { lastStatus: Date.now() } });
+  res.sendStatus(200);
+});
+
+
+
 
 app.listen(5000, () => {
   console.log(chalk.blue(`API Bate Papo UOL is runnig on port 5000`));
