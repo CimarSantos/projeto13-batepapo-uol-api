@@ -116,10 +116,10 @@ app.get("/messages", async (req, res) => {
     .toArray();
   messages.reverse();
 
-  if (!limit || limit <= 0) {
-    res.status(422).send("Algo deu errado com as mensagens");
-  }
-  messages = messages.slice(0, limit);
+    if (!limit || limit <= 0) {
+      res.status(422).send("Algo deu errado com as mensagens");
+    }
+    messages = messages.slice(0, limit);
   messages.reverse();
 
   res.send(messages);
@@ -142,7 +142,22 @@ app.post("/status", async (req, res) => {
   res.sendStatus(200);
 });
 
-
+setInterval(async () => {
+  const participants = await db.collection("participants").find().toArray();
+  participants.map(async (stats) => {
+    if (Date.now() - stats.lastStatus > 10000) {
+      const deslogMessage = {
+        from: stats.name,
+        to: "Todos",
+        text: "sai da sala...",
+        type: "status",
+        time: `${dayjs().format("HH:mm:ss")}`,
+      };
+      await db.collection("participants").deleteOne({ name: stats.name });
+      await db.collection("messages").insertOne(deslogMessage);
+    }
+  });
+}, 15000);
 
 
 app.listen(5000, () => {
