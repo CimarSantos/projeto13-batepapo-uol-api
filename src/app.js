@@ -60,9 +60,9 @@ app.post("/participants", async (req, res) => {
   const sucessMessage = {
     from: req.body.name,
     to: "Todos",
-    text: "Entra na sala",
+    text: "entra na sala...",
     type: "status",
-    time: `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`,
+    time: `${dayjs().format("HH:mm:ss")}`,
   };
 
   await db.collection("participants").insertOne(newUser);
@@ -96,7 +96,7 @@ app.post("/messages", async (req, res) => {
   const newMessage = {
     ...req.body,
     from: user,
-    time: `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`,
+    time: `${dayjs().format("HH:mm:ss")}`,
   };
 
   await db.collection("messages").insertOne(newMessage);
