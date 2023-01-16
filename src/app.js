@@ -54,7 +54,7 @@ app.post("/participants", async (req, res) => {
 
   const newUser = {
     name: req.body.name,
-    laststatus: Date.now(),
+    lastStatus: Date.now(),
   };
 
   const sucessMessage = {
@@ -104,9 +104,22 @@ app.post("/messages", async (req, res) => {
   res.sendStatus(201);
 });
 
-
 app.get("/messages", async (req, res) => {
-  const messages = await db.collection("messages").find().toArray();
+  const limit = req.query.limit;
+  const user = req.headers.user;
+
+  let messages = await db
+    .collection("messages")
+    .find({
+      $or: [{ to: user }, { from: user }, { to: "Todos" }, { type: "message" }],
+    })
+    .toArray();
+  messages.reverse();
+
+  if (limit) messages = messages.slice(0, limit);
+
+  messages.reverse();
+
   res.send(messages);
 });
 
